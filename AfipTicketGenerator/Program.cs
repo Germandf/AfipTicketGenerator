@@ -26,9 +26,14 @@ await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeL
 {
     Headless = false,
     SlowMo = 50,
-    Timeout = 15000
+    Timeout = 15000,
 });
-await using var context = await browser.NewContextAsync();
+await using var context = await browser.NewContextAsync(new BrowserNewContextOptions
+{
+    AcceptDownloads = true,
+});
+var ticketsToPrint = new List<string>();
+Directory.CreateDirectory($"C:\\Boletas");
 
 // Login
 var page = await context.NewPageAsync();
@@ -38,7 +43,7 @@ await page.ClickAsync("input[name='F1:btnSiguiente']");
 await page.FillAsync("input[name='F1:password']", password);
 await page.ClickAsync("input[name='F1:btnIngresar']");
 
-// Generate tickets
+// Generating tickets
 for(int day = days; day >= 0; day--)
 {
     var newPage = await context.RunAndWaitForPageAsync(async () =>
@@ -48,6 +53,18 @@ for(int day = days; day >= 0; day--)
     await newPage.WaitForLoadStateAsync();
     await newPage.ClickAsync("input[value='DE FRANCESCO LUIS']");
     await newPage.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    await newPage.GotoAsync("https://serviciosjava2.afip.gob.ar/rcel/jsp/filtrarComprobantesGenerados.do");
+    await newPage.FillAsync("input[name='fechaEmisionDesde']", DateTime.Today.AddDays(-7).ToString("dd/MM/yyyy"));
+    await newPage.ClickAsync("input[value='Buscar']");
+    var waitForDownloadTask = newPage.WaitForDownloadAsync();
+    await newPage.ClickAsync("input[value='Ver']");
+    var file = await waitForDownloadTask;
+    var filePath = $"C:\\Boletas\\{file.SuggestedFilename}";
+    await file.SaveAsAsync(filePath);
+    ticketsToPrint.Add(filePath);
+
+
+    /*
     await newPage.GotoAsync("https://serviciosjava2.afip.gob.ar/rcel/jsp/buscarPtosVtas.do");
     await newPage.SelectOptionAsync("select[id='puntodeventa']", "2");
     await newPage.SelectOptionAsync("select[id='universocomprobante']", "2");
@@ -70,10 +87,19 @@ for(int day = days; day >= 0; day--)
     await newPage.ClickAsync("input[value='Continuar >']");
     newPage.Dialog += (_, dialog) => dialog.AcceptAsync();
     await newPage.ClickAsync("input[id='btngenerar']");
-    /* TODO DOWNLOAD AND PRINT
-    var download = await page.RunAndWaitForDownloadAsync(async () =>
-    {
-        await newPage.ClickAsync("input[value='Imprimir...']");
-    });
+
+    //  Downloading file...
+    var waitForDownloadTask = newPage.WaitForDownloadAsync();
+    await newPage.ClickAsync("input[value='Imprimir...']");
+    var file = await waitForDownloadTask;
+    var filePath = $"C:\\Boletas\\{file.SuggestedFilename}";
+    await file.SaveAsAsync(filePath);
+    ticketsToPrint.Add(filePath);
     */
+}
+
+// Printing tickets
+foreach (var ticketToPrint in ticketsToPrint)
+{
+    Console.WriteLine($"Ticket to print: {ticketToPrint}");
 }
