@@ -1,16 +1,6 @@
 ﻿using AfipTicketGenerator;
 using Microsoft.Playwright;
-
-// Console
-Console.WriteLine("Welcome to AfipTicketGenerator!");
-Console.WriteLine("Write your CUIT");
-var cuit = Console.ReadLine();
-Console.WriteLine("Write your password");
-var password = ConsoleExtensions.ReadPassword();
-Console.WriteLine("How many days ago discounting from today do you want to generate?");
-var daysInput = Console.ReadLine();
-int.TryParse(daysInput, out var days);
-Console.WriteLine("Generating...");
+using System.Diagnostics;
 
 // Configuration
 List<Product> products = new()
@@ -35,6 +25,18 @@ await using var context = await browser.NewContextAsync(new BrowserNewContextOpt
 var ticketsToPrint = new List<string>();
 Directory.CreateDirectory($"C:\\Boletas");
 
+// Console
+Console.WriteLine("Welcome to AfipTicketGenerator!");
+Console.WriteLine("Write your CUIT");
+var cuit = Console.ReadLine();
+Console.WriteLine("Write your password");
+var password = ConsoleExtensions.ReadPassword();
+Console.WriteLine("How many days ago discounting from today do you want to generate?");
+var daysInput = Console.ReadLine();
+int.TryParse(daysInput, out var days);
+
+Console.WriteLine("Generating...");
+
 // Login
 var page = await context.NewPageAsync();
 await page.GotoAsync("https://auth.afip.gob.ar/contribuyente_/login.xhtml");
@@ -43,9 +45,9 @@ await page.ClickAsync("input[name='F1:btnSiguiente']");
 await page.FillAsync("input[name='F1:password']", password);
 await page.ClickAsync("input[name='F1:btnIngresar']");
 
-// Generating tickets
 for(int day = days; day >= 0; day--)
 {
+    // Generating ticket...
     var newPage = await context.RunAndWaitForPageAsync(async () =>
     {
         await page.ClickAsync("text=Comprobantes en línea");
@@ -53,18 +55,6 @@ for(int day = days; day >= 0; day--)
     await newPage.WaitForLoadStateAsync();
     await newPage.ClickAsync("input[value='DE FRANCESCO LUIS']");
     await newPage.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    await newPage.GotoAsync("https://serviciosjava2.afip.gob.ar/rcel/jsp/filtrarComprobantesGenerados.do");
-    await newPage.FillAsync("input[name='fechaEmisionDesde']", DateTime.Today.AddDays(-7).ToString("dd/MM/yyyy"));
-    await newPage.ClickAsync("input[value='Buscar']");
-    var waitForDownloadTask = newPage.WaitForDownloadAsync();
-    await newPage.ClickAsync("input[value='Ver']");
-    var file = await waitForDownloadTask;
-    var filePath = $"C:\\Boletas\\{file.SuggestedFilename}";
-    await file.SaveAsAsync(filePath);
-    ticketsToPrint.Add(filePath);
-
-
-    /*
     await newPage.GotoAsync("https://serviciosjava2.afip.gob.ar/rcel/jsp/buscarPtosVtas.do");
     await newPage.SelectOptionAsync("select[id='puntodeventa']", "2");
     await newPage.SelectOptionAsync("select[id='universocomprobante']", "2");
@@ -80,7 +70,7 @@ for(int day = days; day >= 0; day--)
         await newPage.FillAsync($"textarea[id='detalle_descripcion{i + 1}']", products[i].Name);
         await newPage.FillAsync($"input[id='detalle_cantidad{i + 1}']", products[i].Quantity);
         await newPage.SelectOptionAsync($"select[id='detalle_medida{i + 1}']", "1");
-        await newPage.FillAsync($"input[id='detalle_precio{i + 1}']", products[i].Quantity);
+        await newPage.FillAsync($"input[id='detalle_precio{i + 1}']", products[i].Price);
         if (i < products.Count - 1)
             await newPage.ClickAsync("input[value='Agregar línea descripción']");
     }
@@ -95,11 +85,18 @@ for(int day = days; day >= 0; day--)
     var filePath = $"C:\\Boletas\\{file.SuggestedFilename}";
     await file.SaveAsAsync(filePath);
     ticketsToPrint.Add(filePath);
-    */
 }
 
-// Printing tickets
-foreach (var ticketToPrint in ticketsToPrint)
+Console.WriteLine("Generating done!");
+Console.WriteLine("Printing...");
+
+foreach (var ticketToPrintPath in ticketsToPrint)
 {
-    Console.WriteLine($"Ticket to print: {ticketToPrint}");
+    // Printing ticket...
+    Console.WriteLine($"Ticket to print: {ticketToPrintPath}");
+    var arguments = @"/C pdfcmd command=""printpdf"" input=""" + ticketToPrintPath + @""" firstpage=""2"" lastpage=""2""";
+    var process = Process.Start("CMD.exe", arguments);
+    process.WaitForExit();
 }
+
+Console.WriteLine("Printing done!");
