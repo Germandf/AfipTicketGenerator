@@ -2,19 +2,24 @@
 using Microsoft.Playwright;
 using System.Diagnostics;
 
+// Console
+Console.WriteLine("Welcome to AfipTicketGenerator!");
+Console.WriteLine("Write your CUIT");
+var cuit = Console.ReadLine();
+Console.WriteLine("Write your password");
+var password = ConsoleExtensions.ReadPassword();
+Console.WriteLine("How many days ago discounting from today do you want to generate? (default 5)");
+var daysInput = Console.ReadLine();
+if (string.IsNullOrWhiteSpace(daysInput)) daysInput = "5";
+int.TryParse(daysInput, out var days);
+Console.WriteLine("Show the generating process? y/n");
+var headless = Console.ReadLine() == "n" ? true : false;
+
 // Configuration
-List<Product> products = new()
-{
-    new() { Name = "Tomate", Quantity = Random.Shared.Next(12, 15).ToString(), Price = "45" },
-    new() { Name = "Banana", Quantity = Random.Shared.Next(12, 15).ToString(), Price = "40" },
-    new() { Name = "Naranja", Quantity = Random.Shared.Next(12, 15).ToString(), Price = "35" },
-    new() { Name = "Manzana", Quantity = Random.Shared.Next(12, 15).ToString(), Price = "35" },
-    new() { Name = "Lechuga", Quantity = Random.Shared.Next(12, 15).ToString(), Price = "30" },
-};
 using var playwright = await Playwright.CreateAsync();
 await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
 {
-    Headless = false,
+    Headless = headless,
     SlowMo = 50,
     Timeout = 15000,
 });
@@ -25,18 +30,6 @@ await using var context = await browser.NewContextAsync(new BrowserNewContextOpt
 var ticketsToPrint = new List<string>();
 Directory.CreateDirectory($"C:\\Boletas");
 
-// Console
-Console.WriteLine("Welcome to AfipTicketGenerator!");
-Console.WriteLine("Write your CUIT");
-var cuit = Console.ReadLine();
-Console.WriteLine("Write your password");
-var password = ConsoleExtensions.ReadPassword();
-Console.WriteLine("How many days ago discounting from today do you want to generate?");
-var daysInput = Console.ReadLine();
-int.TryParse(daysInput, out var days);
-
-Console.WriteLine("Generating...");
-
 // Login
 var page = await context.NewPageAsync();
 await page.GotoAsync("https://auth.afip.gob.ar/contribuyente_/login.xhtml");
@@ -45,9 +38,23 @@ await page.ClickAsync("input[name='F1:btnSiguiente']");
 await page.FillAsync("input[name='F1:password']", password);
 await page.ClickAsync("input[name='F1:btnIngresar']");
 
+// Ticket Generating
 for(int day = days; day >= 0; day--)
 {
-    // Generating ticket...
+    Console.WriteLine($"Generating ticket from {DateTime.Today.AddDays(-day).ToString("dd/MM/yyyy")}...");
+
+    var products = new List<Product>()
+    {
+        new() { Name = "Tomate", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "200" },
+        new() { Name = "Banana", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "190" },
+        new() { Name = "Naranja", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "80" },
+        new() { Name = "Manzana", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "230" },
+        new() { Name = "Lechuga", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "100" },
+        new() { Name = "Zanahoria", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "90" },
+        new() { Name = "Cebolla", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "50" },
+        new() { Name = "Mandarina", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "110" },
+        new() { Name = "Limón", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "70" },
+    };
     var newPage = await context.RunAndWaitForPageAsync(async () =>
     {
         await page.ClickAsync("text=Comprobantes en línea");
@@ -78,25 +85,26 @@ for(int day = days; day >= 0; day--)
     newPage.Dialog += (_, dialog) => dialog.AcceptAsync();
     await newPage.ClickAsync("input[id='btngenerar']");
 
-    //  Downloading file...
+    Console.WriteLine($"Ticket generated");
+
     var waitForDownloadTask = newPage.WaitForDownloadAsync();
     await newPage.ClickAsync("input[value='Imprimir...']");
     var file = await waitForDownloadTask;
     var filePath = $"C:\\Boletas\\{file.SuggestedFilename}";
     await file.SaveAsAsync(filePath);
     ticketsToPrint.Add(filePath);
+
+    Console.WriteLine($"Ticket downloaded to {filePath}");
 }
 
-Console.WriteLine("Generating done!");
-Console.WriteLine("Printing...");
+Console.WriteLine($"Starting printing process...");
 
+// Ticket Printing
 foreach (var ticketToPrintPath in ticketsToPrint)
 {
-    // Printing ticket...
-    Console.WriteLine($"Ticket to print: {ticketToPrintPath}");
     var arguments = @"/C pdfcmd command=""printpdf"" input=""" + ticketToPrintPath + @""" firstpage=""2"" lastpage=""2""";
     var process = Process.Start("CMD.exe", arguments);
     process.WaitForExit();
 }
 
-Console.WriteLine("Printing done!");
+Console.WriteLine($"Done!");
