@@ -62,7 +62,7 @@ for(int day = days; day >= 0; day--)
     await newPage.WaitForLoadStateAsync();
     await newPage.ClickAsync("input[value='DE FRANCESCO LUIS']");
     await newPage.WaitForLoadStateAsync(LoadState.NetworkIdle);
-    await newPage.GotoAsync("https://serviciosjava2.afip.gob.ar/rcel/jsp/buscarPtosVtas.do");
+    await newPage.GotoAsync("https://fe.afip.gob.ar/rcel/jsp/buscarPtosVtas.do");
     await newPage.SelectOptionAsync("select[id='puntodeventa']", "2");
     await newPage.SelectOptionAsync("select[id='universocomprobante']", "2");
     await newPage.ClickAsync("input[value='Continuar >']");
