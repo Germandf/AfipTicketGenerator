@@ -45,15 +45,15 @@ for(int day = days; day >= 0; day--)
 
     var products = new List<Product>()
     {
-        new() { Name = "Tomate", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "200" },
-        new() { Name = "Banana", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "190" },
-        new() { Name = "Naranja", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "80" },
-        new() { Name = "Manzana", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "230" },
-        new() { Name = "Lechuga", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "100" },
-        new() { Name = "Zanahoria", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "90" },
-        new() { Name = "Cebolla", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "50" },
-        new() { Name = "Mandarina", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "110" },
-        new() { Name = "Limón", Quantity = Random.Shared.Next(2, 4).ToString(), Price = "70" },
+        new() { Name = "Tomate", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "150" },
+        new() { Name = "Banana", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "120" },
+        new() { Name = "Naranja", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "110" },
+        new() { Name = "Manzana", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "150" },
+        new() { Name = "Lechuga", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "100" },
+        new() { Name = "Zanahoria", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "120" },
+        new() { Name = "Cebolla", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "130" },
+        new() { Name = "Mandarina", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "140" },
+        new() { Name = "Limón", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "170" },
     };
     var newPage = await context.RunAndWaitForPageAsync(async () =>
     {
@@ -97,6 +97,7 @@ for(int day = days; day >= 0; day--)
     Console.WriteLine($"Ticket downloaded to {filePath}");
 }
 
+/*
 Console.WriteLine($"Starting printing process...");
 
 // Ticket Printing
@@ -106,5 +107,5 @@ foreach (var ticketToPrintPath in ticketsToPrint)
     var process = Process.Start("CMD.exe", arguments);
     process.WaitForExit();
 }
-
+*/
 Console.WriteLine($"Done!");
