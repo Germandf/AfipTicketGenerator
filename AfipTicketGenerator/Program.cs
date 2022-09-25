@@ -87,6 +87,7 @@ for(int day = days; day >= 0; day--)
 
     Console.WriteLine($"Ticket generated");
 
+    /*
     var waitForDownloadTask = newPage.WaitForDownloadAsync();
     await newPage.ClickAsync("input[value='Imprimir...']");
     var file = await waitForDownloadTask;
@@ -95,6 +96,7 @@ for(int day = days; day >= 0; day--)
     ticketsToPrint.Add(filePath);
 
     Console.WriteLine($"Ticket downloaded to {filePath}");
+    */
 }
 
 /*
