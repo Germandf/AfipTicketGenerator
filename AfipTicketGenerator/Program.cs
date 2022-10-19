@@ -33,7 +33,7 @@ Directory.CreateDirectory($"C:\\Boletas");
 // Login
 var page = await context.NewPageAsync();
 await page.GotoAsync("https://auth.afip.gob.ar/contribuyente_/login.xhtml");
-await page.FillAsync("input[name='F1:username']", cuit);
+await page.FillAsync("input[name='F1:username']", cuit!);
 await page.ClickAsync("input[name='F1:btnSiguiente']");
 await page.FillAsync("input[name='F1:password']", password);
 await page.ClickAsync("input[name='F1:btnIngresar']");
@@ -41,20 +41,25 @@ await page.ClickAsync("input[name='F1:btnIngresar']");
 // Ticket Generating
 for(int day = days; day >= 0; day--)
 {
-    Console.WriteLine($"Generating ticket from {DateTime.Today.AddDays(-day).ToString("dd/MM/yyyy")}...");
-
+    // min 4600 - max 5750 - avg 5175
+    const int minValue = 4;
+    const int maxValue = 6; // so its 5
     var products = new List<Product>()
     {
-        new() { Name = "Tomate", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "150" },
-        new() { Name = "Banana", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "120" },
-        new() { Name = "Naranja", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "110" },
-        new() { Name = "Manzana", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "150" },
-        new() { Name = "Lechuga", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "100" },
-        new() { Name = "Zanahoria", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "120" },
-        new() { Name = "Cebolla", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "130" },
-        new() { Name = "Mandarina", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "140" },
-        new() { Name = "Limón", Quantity = Random.Shared.Next(3, 4).ToString(), Price = "170" },
+        new() { Name = "Tomate", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "150" },
+        new() { Name = "Banana", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "120" },
+        new() { Name = "Naranja", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "110" },
+        new() { Name = "Manzana", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "150" },
+        new() { Name = "Lechuga", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "100" },
+        new() { Name = "Zanahoria", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "120" },
+        new() { Name = "Cebolla", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "130" },
+        new() { Name = "Mandarina", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "140" },
+        new() { Name = "Limón", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "130" },
     };
+    var total = products.Sum(x => int.Parse(x.Quantity) * int.Parse(x.Price));
+
+    Console.WriteLine($"Generating ticket for day {DateTime.Today.AddDays(-day).ToString("dd/MM/yyyy")} with a total of ${total}...");
+
     var newPage = await context.RunAndWaitForPageAsync(async () =>
     {
         await page.ClickAsync("text=Comprobantes en línea");
@@ -87,6 +92,7 @@ for(int day = days; day >= 0; day--)
 
     Console.WriteLine($"Ticket generated");
 
+    // No need to print pdfs no more
     /*
     var waitForDownloadTask = newPage.WaitForDownloadAsync();
     await newPage.ClickAsync("input[value='Imprimir...']");
