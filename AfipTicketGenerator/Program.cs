@@ -41,9 +41,9 @@ await page.ClickAsync("input[name='F1:btnIngresar']");
 // Ticket Generating
 for(int day = days; day >= 0; day--)
 {
-    // min 13800 - max 16100 - avg 14950
-    const int minValue = 6;
-    const int maxValue = 8; // so its 7
+    // min 16100 - max 18400 - avg 17250
+    const int minValue = 7;
+    const int maxValue = 9; // so its 8
     var products = new List<Product>()
     {
         new() { Name = "Tomate", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "300" },
