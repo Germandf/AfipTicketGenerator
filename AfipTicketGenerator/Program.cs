@@ -28,7 +28,7 @@ await using var context = await browser.NewContextAsync(new BrowserNewContextOpt
     AcceptDownloads = true,
 });
 var ticketsToPrint = new List<string>();
-Directory.CreateDirectory($"C:\\Boletas");
+// Directory.CreateDirectory($"C:\\Boletas");
 
 // Login
 var page = await context.NewPageAsync();
@@ -41,20 +41,20 @@ await page.ClickAsync("input[name='F1:btnIngresar']");
 // Ticket Generating
 for(int day = days; day >= 0; day--)
 {
-    // min 16100 - max 18400 - avg 17250
+    // min 32200 - max 36800 - avg 34500
     const int minValue = 7;
     const int maxValue = 9; // so its 8
     var products = new List<Product>()
     {
-        new() { Name = "Tomate", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "300" },
-        new() { Name = "Banana", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "240" },
-        new() { Name = "Naranja", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "220" },
-        new() { Name = "Manzana", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "300" },
-        new() { Name = "Lechuga", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "200" },
-        new() { Name = "Zanahoria", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "240" },
-        new() { Name = "Cebolla", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "260" },
-        new() { Name = "Mandarina", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "280" },
-        new() { Name = "Limón", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "260" },
+        new() { Name = "Tomate", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "600" },
+        new() { Name = "Banana", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "480" },
+        new() { Name = "Naranja", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "440" },
+        new() { Name = "Manzana", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "600" },
+        new() { Name = "Lechuga", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "400" },
+        new() { Name = "Zanahoria", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "480" },
+        new() { Name = "Cebolla", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "520" },
+        new() { Name = "Mandarina", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "560" },
+        new() { Name = "Limón", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "520" },
     };
     var total = products.Sum(x => int.Parse(x.Quantity) * int.Parse(x.Price));
 
