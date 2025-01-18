@@ -1,6 +1,5 @@
 ﻿using AfipTicketGenerator;
 using Microsoft.Playwright;
-using System.Diagnostics;
 
 // Console
 Console.WriteLine("Welcome to AfipTicketGenerator!");
@@ -39,7 +38,7 @@ await page.FillAsync("input[name='F1:password']", password);
 await page.ClickAsync("input[name='F1:btnIngresar']");
 
 // Ticket Generating
-for(int day = days; day >= 0; day--)
+for (int day = days; day >= 0; day--)
 {
     // min 32200 - max 36800 - avg 34500
     const int minValue = 7;
