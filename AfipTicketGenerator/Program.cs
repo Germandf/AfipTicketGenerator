@@ -88,6 +88,8 @@ for (int day = days; day >= 0; day--)
     await newPage.ClickAsync("input[value='Continuar >']");
     newPage.Dialog += (_, dialog) => dialog.AcceptAsync();
     await newPage.ClickAsync("input[id='btngenerar']");
+    await newPage.GetByRole(AriaRole.Button, new() { Name = "Confirmar", Exact = true }).ClickAsync();
+    await newPage.WaitForSelectorAsync("b:text('Comprobante Generado')");
 
     Console.WriteLine($"Ticket generated");
 
