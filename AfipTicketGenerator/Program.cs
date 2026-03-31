@@ -1,4 +1,5 @@
-﻿using AfipTicketGenerator;
+using System.Diagnostics;
+using AfipTicketGenerator;
 using Microsoft.Playwright;
 
 // Console
@@ -16,7 +17,7 @@ var headless = Console.ReadLine() == "n" ? true : false;
 
 // Configuration
 using var playwright = await Playwright.CreateAsync();
-await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+await using var browser = await LaunchChromiumAsync(playwright.Chromium, new BrowserTypeLaunchOptions
 {
     Headless = headless,
     SlowMo = 50,
@@ -118,3 +119,58 @@ foreach (var ticketToPrintPath in ticketsToPrint)
 }
 */
 Console.WriteLine($"Done!");
+
+static async Task<IBrowser> LaunchChromiumAsync(IBrowserType chromium, BrowserTypeLaunchOptions options)
+{
+    try
+    {
+        return await chromium.LaunchAsync(options);
+    }
+    catch (PlaywrightException ex) when (ShouldInstallChromium(ex))
+    {
+        Console.WriteLine("Playwright Chromium is not installed. Installing it automatically...");
+        await InstallChromiumAsync();
+        return await chromium.LaunchAsync(options);
+    }
+}
+
+static bool ShouldInstallChromium(PlaywrightException ex)
+{
+    return ex.Message.Contains("Executable doesn't exist", StringComparison.OrdinalIgnoreCase)
+        || ex.Message.Contains("Please run the following command", StringComparison.OrdinalIgnoreCase)
+        || ex.Message.Contains("playwright install", StringComparison.OrdinalIgnoreCase);
+}
+
+static async Task InstallChromiumAsync()
+{
+    var scriptPath = Path.Combine(AppContext.BaseDirectory, "playwright.ps1");
+
+    if (!File.Exists(scriptPath))
+    {
+        throw new InvalidOperationException($"The local Playwright installer was not found at '{scriptPath}'.");
+    }
+
+    using var process = new Process
+    {
+        StartInfo = new ProcessStartInfo
+        {
+            FileName = "powershell",
+            Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" install chromium",
+            WorkingDirectory = AppContext.BaseDirectory,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        }
+    };
+
+    if (!process.Start())
+    {
+        throw new InvalidOperationException("Could not start the automatic Playwright Chromium installation.");
+    }
+
+    await process.WaitForExitAsync();
+
+    if (process.ExitCode != 0)
+    {
+        throw new InvalidOperationException($"The automatic Playwright Chromium installation failed with exit code {process.ExitCode}.");
+    }
+}
