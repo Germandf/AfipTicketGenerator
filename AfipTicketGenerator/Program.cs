@@ -41,9 +41,9 @@ await page.ClickAsync("input[name='F1:btnIngresar']");
 // Ticket Generating
 for (int day = days; day >= 0; day--)
 {
-    // min 32200 - max 36800 - avg 34500
-    const int minValue = 7;
-    const int maxValue = 9; // so its 8
+    // min 37600 - max 42300 - avg 39950 (~1.198.500 mensual)
+    const int minValue = 8;
+    const int maxValue = 10; // so its 9
     var products = new List<Product>()
     {
         new() { Name = "Tomate", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "600" },
@@ -54,7 +54,7 @@ for (int day = days; day >= 0; day--)
         new() { Name = "Zanahoria", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "480" },
         new() { Name = "Cebolla", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "520" },
         new() { Name = "Mandarina", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "560" },
-        new() { Name = "Limón", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "520" },
+        new() { Name = "Limón", Quantity = Random.Shared.Next(minValue, maxValue).ToString(), Price = "620" },
     };
     var total = products.Sum(x => int.Parse(x.Quantity) * int.Parse(x.Price));
 
